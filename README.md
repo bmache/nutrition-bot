@@ -115,17 +115,15 @@ tests/               unit tests, no API key needed
 
 ## Design decisions
 
-Most of these exist because the obvious approach broke in practice.
-
 | Decision | Why |
 |---|---|
-| **Adapter + Strategy + Factory** in `src/llm.py` | Nothing outside this file imports a vendor SDK or knows which provider is active. When CrewAI 1.x moved to native provider SDKs, and again when Google retired a Flash model, each break was a one-file fix. |
-| **Explicit `llm=` on every agent** | Omit it and CrewAI falls back to OpenAI through litellm, then fails with an auth error naming a provider you never configured. The most common reason tutorial code dies outside its original environment. |
-| **Plain classes, not `@CrewBase` decorators** | Template Method written out in ordinary Python. The decorators do the same job by injecting `__init__` and memoising methods — but they hide the wiring, shift between releases, and make the classes awkward to instantiate in a test. |
-| **Pure functions split from `@tool` wrappers** | `clean_ingredients` and `apply_restrictions` are importable on their own, so the entire test suite runs with no API key and no network. |
-| **`context=[...]` for task chaining** | The supported way to pass one task's output to the next. `depends_on` and `input_data` fill tutorial code but are not real `Task` params — ignored on old releases, rejected on current ones. |
-| **Defensive `to_dict()`** | CrewAI has moved its output shape across releases (`json_dict`, `.pydantic`, `.raw`, plain dict). Each is tried in turn; total failure returns raw model text, so a parse miss shows an imperfect answer instead of a stack trace. |
-| **One agent for the analysis workflow** | Recipes need three — detection, filtering and generation fail in different ways. Nutrient analysis returns in a single vision call. More agents there would buy latency and cost to make the diagram look busier. |
+| All model calls go through `src/llm.py` | Keeps vendor SDKs out of the rest of the codebase, so changing provider is a config change. |
+| Explicit `llm=` on every agent | Without it CrewAI defaults to OpenAI and fails with an auth error for a provider you never configured. |
+| Plain classes instead of `@CrewBase` | Easier to read and to instantiate in tests. The decorators inject an `__init__` and memoise methods, which hides the wiring. |
+| Pure functions separate from `@tool` wrappers | Lets the tests import the logic directly and run with no API key and no network. |
+| `context=[...]` for task chaining | The supported way to pass one task's output to the next. `depends_on` and `input_data` are not real `Task` parameters. |
+| `to_dict()` tries several output shapes | CrewAI returns output differently across versions. If none match, the raw text is shown instead of raising. |
+| Analysis workflow uses one agent | A vision model returns the full breakdown in one call, so splitting it would add latency without improving the result. |
 
 ---
 
