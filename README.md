@@ -28,10 +28,6 @@ LLM_PROVIDER=ollama    # fully offline, free forever, no key
 | `ollama` | yes | free | Local `llava` + `llama3.1`. No network. |
 | `openrouter` | varies | free tier | `:free` model list rotates. |
 
-This is not theoretical. During development both CrewAI's 1.x
-provider split and a Gemini model retirement broke the app; each was
-a one-file change because of this layer.
-
 ---
 
 ## Architecture
@@ -119,16 +115,17 @@ tests/               unit tests, no API key needed
 
 ## Design decisions
 
-| Decision | Reason |
+Most of these exist because the obvious approach broke in practice.
+
+| Decision | Why |
 |---|---|
-| **Adapter / Strategy** in `llm.py` | The app depends on one interface, never a vendor SDK. This is what makes the provider swap a config change. |
-| **Factory** (`crew_llm`, `ask_vision`) | Callers say what they want, not how to build it for the active backend. |
-| **Template Method** in `BaseNourishBotCrew` | Both crews share agent construction; each subclass only chooses which tasks run. |
-| No `@CrewBase` decorators | Plain classes are stable across CrewAI releases and far easier to unit test. The decorator magic hides the wiring. |
-| Pure functions split from `@tool` wrappers | Lets the whole test suite run with no API key and no network. |
-| Explicit `llm=` on every agent | Without it CrewAI silently falls back to OpenAI via litellm. This is the number-one reason ported tutorial code fails. |
-| `context=[...]` for task chaining | The supported CrewAI API. `depends_on` / `input_data` are not real `Task` params. |
-| Defensive `to_dict()` | CrewAI has moved output shapes between releases; a parse miss degrades to raw text instead of a stack trace. |
+| **Adapter + Strategy + Factory** in `src/llm.py` | Nothing outside this file imports a vendor SDK or knows which provider is active. When CrewAI 1.x moved to native provider SDKs, and again when Google retired a Flash model, each break was a one-file fix. |
+| **Explicit `llm=` on every agent** | Omit it and CrewAI falls back to OpenAI through litellm, then fails with an auth error naming a provider you never configured. The most common reason tutorial code dies outside its original environment. |
+| **Plain classes, not `@CrewBase` decorators** | Template Method written out in ordinary Python. The decorators do the same job by injecting `__init__` and memoising methods — but they hide the wiring, shift between releases, and make the classes awkward to instantiate in a test. |
+| **Pure functions split from `@tool` wrappers** | `clean_ingredients` and `apply_restrictions` are importable on their own, so the entire test suite runs with no API key and no network. |
+| **`context=[...]` for task chaining** | The supported way to pass one task's output to the next. `depends_on` and `input_data` fill tutorial code but are not real `Task` params — ignored on old releases, rejected on current ones. |
+| **Defensive `to_dict()`** | CrewAI has moved its output shape across releases (`json_dict`, `.pydantic`, `.raw`, plain dict). Each is tried in turn; total failure returns raw model text, so a parse miss shows an imperfect answer instead of a stack trace. |
+| **One agent for the analysis workflow** | Recipes need three — detection, filtering and generation fail in different ways. Nutrient analysis returns in a single vision call. More agents there would buy latency and cost to make the diagram look busier. |
 
 ---
 
