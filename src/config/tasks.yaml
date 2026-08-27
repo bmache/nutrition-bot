@@ -1,0 +1,41 @@
+# Task definitions. {placeholders} are interpolated by CrewAI from
+# the inputs dict passed to crew.kickoff().
+
+ingredient_detection_task:
+  description: >
+    Use the "Extract ingredients" tool on the image at this exact
+    path: {uploaded_image}
+    Then use the "Clean ingredient list" tool to normalise the
+    result. Return only food ingredients -- no plates, cutlery or
+    packaging.
+  expected_output: >
+    A comma-separated list of detected food ingredients.
+
+dietary_filtering_task:
+  description: >
+    The user's dietary restriction is: "{dietary_restrictions}".
+    Take the ingredient list from the previous task and use the
+    "Apply dietary restrictions" tool to remove anything that does
+    not comply. If the restriction is empty, keep the list as is.
+  expected_output: >
+    A comma-separated list of compliant ingredients only.
+
+recipe_suggestion_task:
+  description: >
+    Using ONLY the compliant ingredients from the previous task,
+    propose 2-3 recipes. Basic pantry staples (salt, pepper, oil,
+    water) are allowed. Respect the restriction "{dietary_restrictions}".
+    For each recipe give a title, the ingredients used, numbered
+    instructions, and a calorie estimate per serving.
+  expected_output: >
+    A JSON object matching the RecipeSuggestionOutput schema.
+
+nutrient_analysis_task:
+  description: >
+    Use the "Analyze nutrition" tool on the image at this exact
+    path: {uploaded_image}
+    Report the dish name, assumed portion size, estimated calories,
+    macronutrients, notable vitamins and minerals, and a one
+    paragraph health evaluation.
+  expected_output: >
+    A JSON object matching the NutrientAnalysisOutput schema.

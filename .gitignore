@@ -1,0 +1,10 @@
+.env
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+uploaded_image.jpg
+.DS_Store
+.gradio/
+.idea/
