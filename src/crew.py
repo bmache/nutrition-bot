@@ -94,8 +94,8 @@ class BaseNourishBotCrew:
 
     # -- tasks --------------------------------------------------
     # Note: task chaining uses `context=[...]`, the supported CrewAI
-    # API. The IBM lab's depends_on / input_data kwargs are not real
-    # Task parameters and break on current releases.
+    # API. `depends_on` / `input_data` are not real Task parameters
+    # and break on current releases.
     def build_recipe_tasks(self):
         detect_agent = self.ingredient_detection_agent()
         filter_agent = self.dietary_filtering_agent()

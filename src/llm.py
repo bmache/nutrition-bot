@@ -65,13 +65,6 @@ PROVIDERS: dict[str, ProviderSpec] = {
         vision_model="openrouter/meta-llama/llama-4-maverick:free",
         api_key_env="OPENROUTER_API_KEY",
     ),
-    # The original IBM lab path, kept so the project stays portable.
-    "watsonx": ProviderSpec(
-        chat_model="watsonx/ibm/granite-3-8b-instruct",
-        vision_model="watsonx/meta-llama/llama-4-maverick-17b-128e-instruct-fp8",
-        api_key_env="WATSONX_APIKEY",
-        base_url=os.getenv("WATSONX_URL", "https://us-south.ml.cloud.ibm.com"),
-    ),
 }
 
 
@@ -119,8 +112,8 @@ def _api_key(s: ProviderSpec) -> Optional[str]:
 def crew_llm():
     """Build the CrewAI LLM for the active provider.
 
-    Without this, CrewAI silently falls back to OpenAI via litellm --
-    the single most common reason the IBM lab code fails off-platform.
+    Without this, CrewAI silently falls back to OpenAI via litellm,
+    which fails with a confusing auth error on any other backend.
     """
     from crewai import LLM  # imported lazily so tests stay fast
 

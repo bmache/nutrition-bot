@@ -3,7 +3,6 @@
 # Other providers need their own extra:
 #   ollama      -> no extra needed
 #   openrouter  -> uv pip install "crewai[openai]"
-#   watsonx     -> uv pip install "crewai[watsonx]"
 crewai[google-genai]>=1.0.0
 litellm>=1.55.0
 gradio>=6.0.0

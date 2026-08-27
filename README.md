@@ -6,8 +6,8 @@ respect your dietary restriction.
 
 Built as a **CrewAI multi-agent system** with a **provider-agnostic
 LLM layer** — it runs on a free Gemini key, on a fully offline
-Ollama install, on OpenRouter, or on IBM watsonx, selected by one
-environment variable.
+Ollama install, or on OpenRouter, selected by one environment
+variable.
 
 ---
 
@@ -27,7 +27,6 @@ LLM_PROVIDER=ollama    # fully offline, free forever, no key
 | `gemini` | yes | free tier | Default. Key from Google AI Studio. |
 | `ollama` | yes | free | Local `llava` + `llama3.1`. No network. |
 | `openrouter` | varies | free tier | `:free` model list rotates. |
-| `watsonx` | yes | free tier | The original IBM lab path. |
 
 This is not theoretical. During development both CrewAI's 1.x
 provider split and a Gemini model retirement broke the app; each was
@@ -53,7 +52,7 @@ flowchart TD
     A1 -.vision call.-> L[src/llm.py<br/>provider adapter]
     A2 -.text call.-> L
     A4 -.vision call.-> L
-    L --> V[(Gemini / Ollama /<br/>OpenRouter / watsonx)]
+    L --> V[(Gemini / Ollama /<br/>OpenRouter)]
 
     P --> M[Markdown renderer] --> G
 ```
@@ -203,7 +202,6 @@ litellm, so the provider you choose needs its extra installed:
 ```bash
 uv pip install "crewai[google-genai]"   # gemini  (in requirements.txt)
 uv pip install "crewai[openai]"         # openrouter
-uv pip install "crewai[watsonx]"        # watsonx
 # ollama needs no extra
 ```
 
@@ -249,13 +247,3 @@ Calorie and nutrient figures are model estimates from a photograph,
 not measurements. This is not medical or dietary advice. Check
 ingredients yourself for allergens, and consult a qualified
 professional for anything that matters.
-
----
-
-## Credits
-
-The problem framing comes from the IBM Skills Network lab *Building
-your own AI Nutrition Coach using a Multi-Agent System and
-Multimodal AI*. The implementation here is a rewrite:
-provider-agnostic model layer, decorator-free crew wiring, isolated
-prompts, a test suite and container packaging.
