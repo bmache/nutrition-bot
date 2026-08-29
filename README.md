@@ -1,4 +1,6 @@
 # nutrition-bot
+<img width="3114" height="1982" alt="image" src="https://github.com/user-attachments/assets/765abe3f-b975-467e-9497-d6346d7a0500" />
+
 
 An AI nutrition coach: photograph a meal and get a nutrient
 breakdown, or photograph your ingredients and get recipes that
